@@ -9,8 +9,8 @@ var blankTileData = new Buffer('H4sIAAAAAAAAA5My4WItTyxJLRKS4mAQYmJgkGBWEuD8z9jg
 
 cutout.cut = function(options) {
 
-  var tilesToCut;
-  var tilesToBlank;
+  var tilesToCut = [];
+  var tilesToBlank = [];
   var database;
   var q = d3.queue(1);
   var dbpath = path.join(process.cwd(), options.mbtilesFile);
