@@ -16,8 +16,8 @@ var blankTileData = new Buffer('H4sIAAAAAAAAA5My4WItTyxJLRKS4mAQYmJgkGBWEuD8z9jg
 cutout.cut = function(options) {
 
   var dbpath = path.join(process.cwd(), options.mbtilesFile);
-  var toCut = options.shapeToCut ? JSON.parse(fs.readFileSync(options.shapeToCut)) : null;
-  var toBlank = options.shapeToBlank ? JSON.parse(fs.readFileSync(options.shapeToBlank)) : null;
+  options.toCut = options.shapeToCut ? JSON.parse(fs.readFileSync(options.shapeToCut)) : null;
+  options.toBlank = options.shapeToBlank ? JSON.parse(fs.readFileSync(options.shapeToBlank)) : null;
 
   open(dbpath, function(err, db) {
     if (err) throw err;
@@ -40,7 +40,6 @@ cutout.cut = function(options) {
 
   });
 
-
 };
 
 function open(database, cb) {
@@ -57,13 +56,17 @@ function batchUpdateRows(db, options, i, cb) {
       var cut;
       var blank;
       var zoom = row.zoom_level;
+
       if (options.toCut && (zoom >= options.cutMinZoom && zoom <= options.cutMaxZoom)) {
-        var ll = merc.ll([row.tile_row, row.tile_column], row.zoom_level);
-        cut = inside(ll, toCut);
+        var bbox = merc.bbox(row.tile_row, row.tile_column, row.zoom_level);
+        var ll = pt(bbox);
+        cut = inside(ll, options.toCut);
       }
+
       if (options.toBlank && (zoom >= options.blankMinZoom && zoom <= options.blankMaxZoom)) {
-        var ll = merc.ll([row.tile_row, row.tile_column], row.zoom_level);
-        blank = inside(ll, toBlank);
+        var bbox = merc.bbox(row.tile_row, row.tile_column, row.zoom_level);
+        var ll = pt(bbox);
+        blank = inside(ll, options.toBlank);
       }
 
       if (cut || blank) {
@@ -105,4 +108,8 @@ function alterTile(db, tile_id, cut, blank, cb) {
     q.awaitAll(function(err) {
       cb(err);
     });
+}
+
+function pt(bbox) {
+  return [(bbox[0]+bbox[2])/2, (bbox[1]+bbox[3])/2];
 }
