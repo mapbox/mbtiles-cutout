@@ -52,18 +52,28 @@ function open(database, cb) {
 
 function batchUpdateRows(db, options, i, cb) {
   db.all('SELECT * FROM map WHERE ROWID >= ? AND ROWID < ?', i, i+10000, function(err, res) {
-    if (err) return done(err);
+    if (err) return cb(err);
     res.forEach(function(row) {
-      // TODO first check whether we want to do anything at this zoom level
-      // ie. look at the cutMinZoom / cutMaxZoom, etc.
-      var ll = merc.ll([row.tile_row, row.tile_column], row.zoom_level);
       var cut;
       var blank;
-      if (toCut) cut = inside(ll, toCut);
-      if (toBlank) blank = inside(ll, toBlank);
-      alterTile(db, row.tile_id, cut, blank, function(err) {
-        cb(err);
-      });
+      var zoom = row.zoom_level;
+      if (options.toCut && (zoom >= options.cutMinZoom && zoom <= options.cutMaxZoom)) {
+        var ll = merc.ll([row.tile_row, row.tile_column], row.zoom_level);
+        cut = inside(ll, toCut);
+      }
+      if (options.toBlank && (zoom >= options.blankMinZoom && zoom <= options.blankMaxZoom)) {
+        var ll = merc.ll([row.tile_row, row.tile_column], row.zoom_level);
+        blank = inside(ll, toBlank);
+      }
+
+      if (cut || blank) {
+        alterTile(db, row.tile_id, cut, blank, function(err) {
+          cb(err);
+        });
+      } else {
+        cb();
+      }
+
     });
   });
 }
