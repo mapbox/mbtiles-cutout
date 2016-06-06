@@ -131,7 +131,7 @@ cutout.cutOrBlank = function(zxy, polygon, minZoom, maxZoom) {
   if (z >= minZoom && z <= maxZoom) {
     var bbox = merc.bbox(x, y, z);
     var ll = pt(bbox);
-    return inside([ll[1], ll[0]], polygon);
+    return inside(ll, polygon);
   } else {
     return false;
   }
