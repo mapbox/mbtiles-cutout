@@ -58,20 +58,17 @@ function batchUpdateRows(db, options, i, cb) {
     res.forEach(function(row) {
 
       q.defer(function(done) {
+
+        var zxy = [row.zoom_level, row.tile_row, row.tile_column];
         var cut;
         var blank;
-        var zoom = row.zoom_level;
 
-        if (options.toCut && (zoom >= options.cutMinZoom && zoom <= options.cutMaxZoom)) {
-          var bbox = merc.bbox(row.tile_row, row.tile_column, row.zoom_level);
-          var ll = pt(bbox);
-          cut = inside(ll, options.toCut);
+        if (options.toCut) {
+          cut = cutOrBlank(zxy, options.toCut, options.cutMinZoom, options.cutMaxZoom);
         }
 
-        if (options.toBlank && (zoom >= options.blankMinZoom && zoom <= options.blankMaxZoom)) {
-          var bbox = merc.bbox(row.tile_row, row.tile_column, row.zoom_level);
-          var ll = pt(bbox);
-          blank = inside(ll, options.toBlank);
+        if (options.toBlank) {
+          blank = cutOrBlank(zxy, options.toBlank, options.blankMinZoom, options.blankMaxZoom);
         }
 
         if (cut || blank) {
@@ -123,4 +120,19 @@ function alterTile(db, tile_id, cut, blank, cb) {
 
 function pt(bbox) {
   return [(bbox[0]+bbox[2])/2, (bbox[1]+bbox[3])/2];
+}
+
+function cutOrBlank(zxy, polygon, minZoom, maxZoom) {
+  var z = zxy[0];
+  var x = zxy[1];
+  var y = zxy[2];
+
+  if (z >= minZoom && z <= maxZoom) {
+    var bbox = merc.bbox(x, y, z);
+    var ll = pt(bbox);
+    return inside([ll[1], ll[0]], polygon);
+  } else {
+    return false;
+  }
+
 }
