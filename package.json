@@ -10,8 +10,9 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "d3-queue": "^2.0.3",
+    "point-in-polygon": "^1.0.0",
+    "sphericalmercator": "^1.0.5",
     "sqlite3": "^3.1.4",
-    "tile-cover": "^3.0.1",
     "yargs": "^4.7.1"
   },
   "bin": {
