@@ -52,32 +52,43 @@ function open(database, cb) {
 function batchUpdateRows(db, options, i, cb) {
   db.all('SELECT * FROM map WHERE ROWID >= ? AND ROWID < ?', i, i+10000, function(err, res) {
     if (err) return cb(err);
+
+    var q = d3.queue(10);
+
     res.forEach(function(row) {
-      var cut;
-      var blank;
-      var zoom = row.zoom_level;
 
-      if (options.toCut && (zoom >= options.cutMinZoom && zoom <= options.cutMaxZoom)) {
-        var bbox = merc.bbox(row.tile_row, row.tile_column, row.zoom_level);
-        var ll = pt(bbox);
-        cut = inside(ll, options.toCut);
-      }
+      q.defer(function(done) {
+        var cut;
+        var blank;
+        var zoom = row.zoom_level;
 
-      if (options.toBlank && (zoom >= options.blankMinZoom && zoom <= options.blankMaxZoom)) {
-        var bbox = merc.bbox(row.tile_row, row.tile_column, row.zoom_level);
-        var ll = pt(bbox);
-        blank = inside(ll, options.toBlank);
-      }
+        if (options.toCut && (zoom >= options.cutMinZoom && zoom <= options.cutMaxZoom)) {
+          var bbox = merc.bbox(row.tile_row, row.tile_column, row.zoom_level);
+          var ll = pt(bbox);
+          cut = inside(ll, options.toCut);
+        }
 
-      if (cut || blank) {
-        alterTile(db, row.tile_id, cut, blank, function(err) {
-          cb(err);
-        });
-      } else {
-        cb();
-      }
+        if (options.toBlank && (zoom >= options.blankMinZoom && zoom <= options.blankMaxZoom)) {
+          var bbox = merc.bbox(row.tile_row, row.tile_column, row.zoom_level);
+          var ll = pt(bbox);
+          blank = inside(ll, options.toBlank);
+        }
+
+        if (cut || blank) {
+          alterTile(db, row.tile_id, cut, blank, function(err) {
+            done(err);
+          });
+        } else {
+          done();
+        }
+      });
 
     });
+
+    q.awaitAll(function(err) {
+      cb(err);
+    });
+
   });
 }
 
