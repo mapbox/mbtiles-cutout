@@ -72,7 +72,7 @@ function batchUpdateRows(db, options, i, cb) {
         }
 
         if (cut || blank) {
-          alterTile(db, row.tile_id, cut, blank, function(err) {
+          alterTile(db, row, cut, blank, function(err) {
             done(err);
           });
         } else {
@@ -89,16 +89,17 @@ function batchUpdateRows(db, options, i, cb) {
   });
 }
 
-function alterTile(db, tile_id, cut, blank, cb) {
+function alterTile(db, row, cut, blank, cb) {
     var q = d3.queue();
 
     if (cut) {
       q.defer(function(done) {
-        db.run('DELETE FROM images WHERE tile_id = ?', tile_id, function(err) {
+        db.run('DELETE FROM images WHERE tile_id = ?', row.tile_id, function(err) {
           if (err) return done(err);
-          db.run('DELETE FROM map WHERE tile_id = ?', tile_id, function(err) {
+          db.run('DELETE FROM map WHERE zoom_level = ? AND tile_row = ? AND tile_column = ?',
+            row.zoom_level, row.tile_row, row.tile_column, function(err) {
             if (err) return done(err);
-            cb();
+            done();
           });
         });
       });
