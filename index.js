@@ -129,7 +129,7 @@ cutout.cutOrBlank = function(zxy, polygon, minZoom, maxZoom) {
   var y = zxy[2];
 
   if (z >= minZoom && z <= maxZoom) {
-    var bbox = merc.bbox(x, y, z);
+    var bbox = merc.bbox(x, y, z, true);
     var ll = pt(bbox);
     return inside(ll, polygon);
   } else {
