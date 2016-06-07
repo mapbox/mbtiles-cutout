@@ -59,7 +59,7 @@ function batchUpdateRows(db, options, i, cb) {
 
       q.defer(function(done) {
 
-        var zxy = [row.zoom_level, row.tile_row, row.tile_column];
+        var zxy = [row.zoom_level, row.tile_column, row.tile_row];
         var cut;
         var blank;
 
