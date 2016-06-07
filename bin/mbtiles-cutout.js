@@ -2,17 +2,6 @@
 
 var cutter = require('..');
 
-/*
-var args = process.argv.slice(2);
-
-// path to an mbtiles tileset
-var mbtiles = args[0];
-// polygon of tiles to delete
-var shapeToCut = args[1];
-// polygon of tiles to blank-out
-var shapeToBlankOut = args[2];
-*/
-
 var options = require( 'yargs' )
   .usage('Usage: $0 -m <mbtiles-file> -c <shape-to-cut> -b <shape-to-blank> --cut-min-zoom N --cut-max-zoom N --blank-min-zoom N --blank-max-zoom M')
   .option('m', {
@@ -20,6 +9,13 @@ var options = require( 'yargs' )
     demand: true,
     describe: 'Path to mbtiles-file to cut',
     type: 'string'
+  })
+  .option('t', {
+    alias: 'tms-style',
+    demand: false,
+    describe: 'Whether mbtiles tileset is in tms style',
+    type: 'boolean',
+    default: 'true'
   })
   .option('c', {
     alias: 'shape-to-cut',

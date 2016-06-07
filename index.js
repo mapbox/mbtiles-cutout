@@ -64,11 +64,11 @@ function batchUpdateRows(db, options, i, cb) {
         var blank;
 
         if (options.toCut) {
-          cut = cutout.cutOrBlank(zxy, options.toCut, options.cutMinZoom, options.cutMaxZoom);
+          cut = cutout.cutOrBlank(zxy, options.toCut, options.cutMinZoom, options.cutMaxZoom, options.tmsStyle);
         }
 
         if (options.toBlank) {
-          blank = cutout.cutOrBlank(zxy, options.toBlank, options.blankMinZoom, options.blankMaxZoom);
+          blank = cutout.cutOrBlank(zxy, options.toBlank, options.blankMinZoom, options.blankMaxZoom, options.tmsStyle);
         }
 
         if (cut || blank) {
@@ -123,13 +123,13 @@ function pt(bbox) {
   return [(bbox[0]+bbox[2])/2, (bbox[1]+bbox[3])/2];
 }
 
-cutout.cutOrBlank = function(zxy, polygon, minZoom, maxZoom) {
+cutout.cutOrBlank = function(zxy, polygon, minZoom, maxZoom, tms_style) {
   var z = zxy[0];
   var x = zxy[1];
   var y = zxy[2];
 
   if (z >= minZoom && z <= maxZoom) {
-    var bbox = merc.bbox(x, y, z, true);
+    var bbox = merc.bbox(x, y, z, tms_style);
     var ll = pt(bbox);
     return inside(ll, polygon);
   } else {
