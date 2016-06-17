@@ -10,6 +10,7 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "d3-queue": "^2.0.3",
+    "mapnik": "^3.5.13",
     "parallel-stream": "^1.1.2",
     "pbf": "^2.0.1",
     "point-in-polygon": "^1.0.0",
