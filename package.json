@@ -10,9 +10,16 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "d3-queue": "^2.0.3",
+    "lineclip": "^1.1.5",
+    "mbtiles": "^0.9.0",
     "point-in-polygon": "^1.0.0",
     "sphericalmercator": "^1.0.5",
     "sqlite3": "^3.1.4",
+    "stream": "0.0.2",
+    "tile-cover": "^3.0.1",
+    "tilebelt": "^1.0.1",
+    "turf-intersect": "^3.0.10",
+    "underscore": "^1.8.3",
     "yargs": "^4.7.1"
   },
   "devDependencies": {
