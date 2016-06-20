@@ -3,9 +3,10 @@
 
 var fs = require('fs');
 var intersect = require('turf-intersect');
+var lineclip = require('lineclip');
 var mbtiles = require('mbtiles');
 var stream = require('stream');
-var tilebelt = require('tilebelt').tileToGeoJSON;
+var tilebelt = require('tilebelt').tileToBBOX;
 
 // Provide feature path, intput filename, and output filename as arguments
 var featurePath = process.argv[2];
@@ -32,24 +33,27 @@ function tileFormat (chunk, feature) {
   var array = chunk.toString().split('\n');
   for (var i = 0; i < array.length; i++) {
     if (array[i] !== '') {
-      var intersections = 0;
       var zxy = array[i].split('/');
       var xyz = [ Number(zxy[1]), Number(zxy[2]), Number(zxy[0]) ];
-      var geojson = tilebelt(xyz);
+      var bbox = tilebelt(xyz);
+      var intersections = 0;
+
       for (var j = 0; j < feature.geometry.coordinates.length; j++) {
-        var polygon;
+        var clipped;
         if (feature.geometry.type === 'Polygon') {
-          polygon = {"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[ feature.geometry.coordinates[j] ]}};
+          clipped = lineclip(feature.geometry.coordinates[j], bbox);
+        } else if (feature.geometry.type === 'MultiPolygon') {
+          clipped = lineclip(feature.geometry.coordinates[j][0], bbox);
         } else {
-          polygon = {"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":feature.geometry.coordinates[j]}};
+          throw new Error('Invalid feature geometry type');
         };
-        if (intersect(polygon ,geojson) !== undefined) {
-          intersections++;
-        }
+        clipped.length !== 0 ? intersections++ : intersections;
       }
+
       if (intersections === 0) {
         result += array[i] + '\n';
       }
+
     }
   }
   return result;
